@@ -6,23 +6,21 @@ import math
 
 class Shape:
     title = "Фигура"
-    """Абсолютно у всех фигур есть хотя бы 1 параметр (будь то сторона или радиус)."""
-    def __init__(self, a: float):
-        self.a = a
+
     """Для абсолютно всех фигур мы можем посчитать площадь, поэтому вынесем этот метод в главный класс."""
     def area(self):
         pass
 
 
 """Фигуры делятся на плоские и объемные. Наследуем два этих класса от родительского Фигура.
-Иницлизируем через super() класс."""
+У всех плоских фигур есть хотя бы один параметр."""
 
 
 class FlatShape(Shape):
     title = "Плоская фигура"
 
     def __init__(self, a: float):
-        super().__init__(a)
+        self.a = a
     """Для плоских фигур по мимо площади мы можем считать периметр."""
     def perimeter(self):
         pass
@@ -31,8 +29,6 @@ class FlatShape(Shape):
 class SolidShape(Shape):
     title = "Объемная фигура"
 
-    def __init__(self, a: float):
-        super().__init__(a)
     """Для объемных фигур кроме площади мы можем посчитаь объем."""
     def volume(self):
         pass
@@ -142,35 +138,144 @@ class Triangle(FlatShape):
         return math.sqrt(2 * self.a ** 2 + 2 * self.b ** 2 - self.c ** 2) / 2
 
 
+"""Трапеция в отличии от других фигур задаётся 4-мя сторонами, соответственно, добавляем их в свойства.
+Переопределим методы, вычисляющие площадь и периметр, а также добавим специфические методы:
+диагональ и средняя линяя"""
+
+
 class Trapezoid(FlatShape):
     title = "Трапеция"
 
-    def __init__(self, a: float, b: float, c: float = None, d: float = None, h: float = None):
+    def __init__(self, a: float, b: float, c: float, d: float):
         super().__init__(a)
         self.b = b
         self.c = c
         self.d = d
-        self.h = h
 
-    def area(self):
-        if self.h is not None:
-            return self.mean_line() * self.h
-        elif self.c is not None and self.d is not None:
-            return (self.a + self.b) / 2 * math.sqrt(self.c ** 2 - (((self. b - self.a) ** 2 + self.b ** 2 - self.d ** 2) / 2 * (self.b - self.a) ** 2))
-        else:
-            return None
+    def area(self) -> float:
+        d = math.sqrt(self.c ** 2 - (((self. b - self.a) ** 2 + self.c ** 2 - self.d ** 2) / 2 * (self.b - self.a)) ** 2)
+        return self.mean_line() * d
 
-    def perimeter(self):
-        if self.c is not None and self.d is not None:
-            return self.a + self.b + self.c + self.c
-        else:
-            return None
+    def perimeter(self) -> float:
+        return self.a + self.b + self.c + self.c
 
     def diagonal(self) -> float:
-        return
-
-    def bisector(self) -> float:
-        return 
+        return math.sqrt(self.d ** 2 + self.a * self.b - self.b * (self.d ** 2 - self.c ** 2) / (self.b - self.a))
 
     def mean_line(self) -> float:
         return (self.a + self.b) / 2
+
+
+"""Куб наследуем от класса Объемные фигуры. Заданим через один параметр - основание, которое является квадратом.
+Специфическим методом является вычисление диагонали."""
+
+
+class Cube(SolidShape):
+    title = "Куб"
+
+    def __init__(self, ground: Square):
+        self.ground = ground
+
+    def area(self) -> float:
+        return 6 * self.ground.a ** 2
+
+    def volume(self) -> float:
+        return self.ground.a ** 3
+
+    def diagonal(self) -> float:
+        return math.sqrt(3) * self.ground.a
+
+
+"""Прямоугольник наследуем от объемных фигур. Задаем двумя пармаметрами - основание,
+которое является прямоугольником, и высота. Переопределяем методы и добавим метод даигональ."""
+
+
+class Rhomboid(SolidShape):
+    title = "Параллелограмм"
+
+    def __init__(self, ground: Rectangle, h: float):
+        self.ground = ground
+        self.h = h
+
+    def area(self) -> float:
+        return 2 * (self.h * self.ground.a + self.ground.a * self.ground.b + self.h * self.ground.b)
+
+    def volume(self) -> float:
+        return self.ground.a * self.ground.b * self.h
+
+    def diagonal(self) -> float:
+        return math.sqrt(self.ground.a ** 2 + self.ground.b ** 2 + self.h ** 2)
+
+
+"""Сферу - объемнаяя фигура. Среди свойств только радиус.
+Переопределим методы родительского класса - площадь и объем."""
+
+
+class Sphere(SolidShape):
+    title = "Сфера"
+
+    def __init__(self, a: float):
+        self.a = a
+
+    def area(self) -> float:
+        return 4 * math.pi * self.a ** 2
+
+    def volume(self) -> float:
+        return 4 / 3 * math.pi * self.a ** 3
+
+
+"""Конус инициализируем через два параметра - круг, который лежит в основании, и высота. 
+Базовые методы переопределим."""
+
+
+class Cone(SolidShape):
+    title = "Конус"
+
+    def __init__(self, ground: Circle, h: float):
+        self.ground = ground
+        self.h = h
+
+    def area(self) -> float:
+        return math.pi * self.ground.a * (math.sqrt(self.h ** 2 + self.ground.a ** 2) + self.ground.a)
+
+    def volume(self) -> float:
+        return 2 * math.pi * self.ground.a * (self.h + self.ground.a)
+
+
+"""Цилиндр похож на конус, поэтому мы можем наследовать его от конуса. Пеереопределим основные методы.
+Специфическим методом также является диагональ. Расширим им класс."""
+
+
+class Cylinder(Cone):
+    title = "Цилиндр"
+
+    def __init__(self, ground: Circle, h: float):
+        super().__init__(ground)
+        super().__init__(h)
+
+    def area(self) -> float:
+        return 4 * math.pi * self.ground.a ** 2
+
+    def volume(self) -> float:
+        return 2 * math.pi * self.ground.a * (self.h + self.ground.a)
+
+    def diagonal(self) -> float:
+        return math.sqrt(self.h ** 2 + 4 * self.ground.a ** 2)
+
+
+"""Для упрощения предположим, что у пирамиды в основании лежит треугольник.
+Зададим двумя параметрами - основание (тип треугольник) и высота."""
+
+
+class Pyramid(SolidShape):
+    title = "Пирамида"
+
+    def __init__(self, ground: Triangle, h: float):
+        self.ground = ground
+        self.h = h
+
+    def area(self) -> float:
+        return self.ground.perimeter() * self.h / 2 + self.ground.area()
+
+    def volume(self) -> float:
+        return self.ground.area() * self.h / 3
