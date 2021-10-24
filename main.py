@@ -275,7 +275,7 @@ class Pyramid(SolidShape):
         self.h = h
 
     def area(self) -> float:
-        return self.ground.perimeter() * self.h / 2 + self.ground.area()
+        return self.ground.area()
 
     def volume(self) -> float:
         return self.ground.area() * self.h / 3
@@ -437,11 +437,103 @@ class TestPyramid(unittest.TestCase):
         self.pyramid = Pyramid(Triangle(3, 4, 5), 4)
 
     def test_area(self):
-        self.assertEqual(int(self.pyramid.area()), 30)
+        self.assertEqual(int(self.pyramid.area()), 6)
 
     def test_volume(self):
         self.assertEqual(int(self.pyramid.volume()), 8)
 
 
+def check_input(a):
+    while True:
+        if a.isalnum():
+            a = float(a)
+            break
+        else:
+            print('Это не число! Введите число')
+            a = input()
+    return a
+
+
 if __name__ == "__main__":
-    unittest.main()
+    #unittest.main()
+
+    shape = input('Введите фигуру ').lower()
+    if shape == 'квадрат':
+        r = check_input(input('Введите длину стороны '))
+        print('Площадь равна', Square(r).area())
+        print('Периметр равен', Square(r).perimeter())
+        print('Диагональ равна', Square(r).diagonal())
+    elif shape == 'круг':
+        r = check_input(input('Введите радиус '))
+        print('Площадь равна', Circle(r).area())
+        print('Периметр равен', Circle(r).perimeter())
+    elif shape == 'прямоугольник':
+        r = check_input(input('Введите длину первой стороны '))
+        s = check_input(input('Введите длину второй стороны '))
+        print('Площадь равна', Rectangle(r, s).area())
+        print('Периметр равен', Rectangle(r, s).perimeter())
+        print('Диагональ равна', Rectangle(r, s).diagonal())
+    elif shape == 'ромб':
+        r = check_input(input('Введите длину первой стороны '))
+        corner = check_input(input('Введите угол в градусах от 0 до 180 не включительно '))
+        while True:
+            if corner < 180 and corner > 0:
+                break
+            else:
+                print('Угол выходит из диапазона ')
+                corner = check_input(input('Введите угол в градусах от 0 до 180 не включительно '))
+        print('Площадь равна', Rhombus(r, corner).area())
+        print('Периметр равен', Rhombus(r, corner).perimeter())
+        print('Диагональ равна', Rhombus(r, corner).diagonal())
+    elif shape == 'треугольник':
+        r = check_input(input('Введите длину первой стороны '))
+        s = check_input(input('Введите длину второй стороны '))
+        t = check_input(input('Введите длину третьей стороны '))
+        print('Площадь равна', Triangle(r, s, t).area())
+        print('Периметр равен', Triangle(r, s, t).perimeter())
+        print('Медиана  на сторону с равна', Triangle(r, s, t).median())
+        print('Биссектрисса на сторону с равна', Triangle(r, s, t).bisector())
+    elif shape == 'трапеция':
+        r = check_input(input('Введите длину первое основание '))
+        s = check_input(input('Введите длину второе основание '))
+        t = check_input(input('Введите длину боковой стороны '))
+        u = check_input(input('Введите длину второй боковой стороны '))
+        print('Площадь равна', Trapezoid(r, s, t, u).area())
+        print('Периметр равен', Trapezoid(r, s, t, u).perimeter())
+        print('Диагональ равна', Trapezoid(r, s, t, u).diagonal())
+        print('Средняя линяя равна', Trapezoid(r, s, t, u).mean_line())
+    elif shape == 'куб':
+        r = check_input(input('Введите длину стороны '))
+        print('Площадь равна', Cube(Square(r)).area())
+        print('Объем равен', Cube(Square(r)).volume())
+        print('Диагональ равна', Cube(Square(r)).diagonal())
+    elif shape == 'параллелограмм':
+        r = check_input(input('Введите длину первой стороны '))
+        s = check_input(input('Введите длину второй стороны '))
+        u = check_input(input('Введите длину высоты '))
+        print('Площадь равна', Rhomboid(Rectangle(r, s), u).area())
+        print('Объем равен', Rhomboid(Rectangle(r, s), u).volume())
+        print('Диагональ равна', Rhomboid(Rectangle(r, s), u).diagonal())
+    elif shape == 'сфера':
+        r = check_input(input('Введите радиус '))
+        print('Площадь равна', Sphere(r).area())
+        print('Объем равен', Sphere(r).volume())
+    elif shape == 'конус':
+        r = check_input(input('Введите радиус '))
+        s = check_input(input('Введите высоту '))
+        print('Площадь равна', Cone(Circle(r), s).area())
+        print('Объем равен', Cone(Circle(r), s).volume())
+    elif shape == 'цилиндр':
+        r = check_input(input('Введите радиус '))
+        s = check_input(input('Введите высоту '))
+        print('Площадь равна', Cylinder(Circle(r), s).area())
+        print('Объем равен', Cylinder(Circle(r), s).volume())
+    elif shape == 'пирамида':
+        r = check_input(input('Введите длину первой стороны '))
+        s = check_input(input('Введите длину второй стороны '))
+        t = check_input(input('Введите длину третьей стороны '))
+        u = check_input(input('Введите длину высоты'))
+        print('Площадь основания равна', Pyramid(Triangle(r, s, t), u).area())
+        print('Объем равен', Pyramid(Triangle(r, s, t), u).volume())
+    else:
+        print('Фигура не из списка: круг, квадрат, прямоугольник, треугольник, ромб, трапеция, куб, параллелограмм, сфера, конус, цилиндр, пирамиды')
