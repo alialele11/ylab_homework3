@@ -1,4 +1,5 @@
 import math
+import unittest
 
 
 """Базовым классом для всех фигур сделаем класс Фигура."""
@@ -105,15 +106,15 @@ class Rhombus(Square):
         self.alfa = alfa
 
     def area(self) -> float:
-        return self.a ** 2 * math.sin(self.alfa)
+        return self.a ** 2 * math.sin(math.radians(self.alfa))
 
     def diagonal(self) -> float:
-        return self.a * math.sqrt(2 + 2 * math.cos(self.alfa))
+        return self.a * math.sqrt(2 + 2 * math.cos(math.radians(self.alfa)))
 
 
 """Треугольник задается тремя параметрами (три стороны), одну сторону инициализируем через родительский класс
 Плоские фигуры, остальные внутри. Переопределяем классы площадь и периметр, а также добавляем специфические для 
-этого класса методы - биссектриса и медиана."""
+этого класса методы - биссектриса и медиана. Медиану и биссектрису для примера посчитаем одну - на сторону c"""
 
 
 class Triangle(FlatShape):
@@ -153,8 +154,8 @@ class Trapezoid(FlatShape):
         self.d = d
 
     def area(self) -> float:
-        d = math.sqrt(self.c ** 2 - (((self. b - self.a) ** 2 + self.c ** 2 - self.d ** 2) / 2 * (self.b - self.a)) ** 2)
-        return self.mean_line() * d
+        d = self.b - self.a
+        return self.mean_line() * math.sqrt(self.c ** 2 - ((d ** 2 + self.c ** 2 - self.d ** 2) / 2 / d) ** 2)
 
     def perimeter(self) -> float:
         return self.a + self.b + self.c + self.c
@@ -239,7 +240,7 @@ class Cone(SolidShape):
         return math.pi * self.ground.a * (math.sqrt(self.h ** 2 + self.ground.a ** 2) + self.ground.a)
 
     def volume(self) -> float:
-        return 2 * math.pi * self.ground.a * (self.h + self.ground.a)
+        return self.ground.area() * self.h / 3
 
 
 """Цилиндр похож на конус, поэтому мы можем наследовать его от конуса. Пеереопределим основные методы.
@@ -250,14 +251,13 @@ class Cylinder(Cone):
     title = "Цилиндр"
 
     def __init__(self, ground: Circle, h: float):
-        super().__init__(ground)
-        super().__init__(h)
+        super().__init__(ground, h)
 
     def area(self) -> float:
-        return 4 * math.pi * self.ground.a ** 2
+        return 2 * math.pi * self.ground.a * (self.h + self.ground.a)
 
     def volume(self) -> float:
-        return 2 * math.pi * self.ground.a * (self.h + self.ground.a)
+        return math.pi * self.ground.a ** 2 * self.h
 
     def diagonal(self) -> float:
         return math.sqrt(self.h ** 2 + 4 * self.ground.a ** 2)
@@ -279,3 +279,169 @@ class Pyramid(SolidShape):
 
     def volume(self) -> float:
         return self.ground.area() * self.h / 3
+
+
+class TestSquare(unittest.TestCase):
+    def setUp(self):
+        self.square = Square(3)
+
+    def test_area(self):
+        self.assertEqual(int(self.square.area()), 9)
+
+    def test_perimeter(self):
+        self.assertEqual(int(self.square.perimeter()), 12)
+
+    def test_diagonal(self):
+        self.assertEqual(round(self.square.diagonal(), 3), 4.243)
+
+
+class TestCircle(unittest.TestCase):
+    def setUp(self):
+        self.circle = Circle(3)
+
+    def test_area(self):
+        self.assertEqual(round(self.circle.area(), 3), 28.274)
+
+    def test_perimeter(self):
+        self.assertEqual(round(self.circle.perimeter(), 2), 18.85)
+
+
+class TestRectangle(unittest.TestCase):
+    def setUp(self):
+        self.rectangle = Rectangle(3, 4)
+
+    def test_area(self):
+        self.assertEqual(int(self.rectangle.area()), 12)
+
+    def test_perimeter(self):
+        self.assertEqual(int(self.rectangle.perimeter()), 14)
+
+    def test_diagonal(self):
+        self.assertEqual(int(self.rectangle.diagonal()), 5)
+
+
+class TestRhombus(unittest.TestCase):
+    def setUp(self):
+        self.rhombus = Rhombus(3, 60)
+
+    def test_area(self):
+        self.assertEqual(round(self.rhombus.area(), 3), 7.794)
+
+    def test_perimeter(self):
+        self.assertEqual(int(self.rhombus.perimeter()), 12)
+
+    def test_diagonal(self):
+        self.assertEqual(round(self.rhombus.diagonal(), 3), 5.196)
+
+
+class TestTriangle(unittest.TestCase):
+    def setUp(self):
+        self.triangle = Triangle(3, 4, 5)
+
+    def test_area(self):
+        self.assertEqual(int(self.triangle.area()), 6)
+
+    def test_perimeter(self):
+        self.assertEqual(int(self.triangle.perimeter()), 12)
+
+    def test_median(self):
+        self.assertEqual(round(self.triangle.median(), 1), 2.5)
+
+    def test_bisector(self):
+        self.assertEqual(round(self.triangle.bisector(), 3), 2.424)
+
+
+class TestTrapezoid(unittest.TestCase):
+    def setUp(self):
+        self.trapezoid = Trapezoid(3, 6, 4, 4)
+
+    def test_area(self):
+        self.assertEqual(round(self.trapezoid.area(), 3), 16.686)
+
+    def test_perimeter(self):
+        self.assertEqual(int(self.trapezoid.perimeter()), 17)
+
+    def test_diagonal(self):
+        self.assertEqual(round(self.trapezoid.diagonal(), 3), 5.831)
+
+    def test_mean_line(self):
+        self.assertEqual(round(self.trapezoid.mean_line(), 1), 4.5)
+
+
+class TestCube(unittest.TestCase):
+    def setUp(self):
+        self.cube = Cube(Square(4))
+
+    def test_area(self):
+        self.assertEqual(int(self.cube.area()), 96)
+
+    def test_volume(self):
+        self.assertEqual(int(self.cube.volume()), 64)
+
+    def test_diagonal(self):
+        self.assertEqual(round(self.cube.diagonal(), 3), 6.928)
+
+
+class TestRhomboid(unittest.TestCase):
+    def setUp(self):
+        self.rhomboid = Rhomboid(Rectangle(4, 3), 3)
+
+    def test_area(self):
+        self.assertEqual(int(self.rhomboid.area()), 66)
+
+    def test_volume(self):
+        self.assertEqual(int(self.rhomboid.volume()), 36)
+
+    def test_diagonal(self):
+        self.assertEqual(round(self.rhomboid.diagonal(), 3), 5.831)
+
+
+class TestSphere(unittest.TestCase):
+    def setUp(self):
+        self.sphere = Sphere(3)
+
+    def test_area(self):
+        self.assertEqual(round(self.sphere.area(), 3), 113.097)
+
+    def test_volume(self):
+        self.assertEqual(round(self.sphere.volume(), 3), 113.097)
+
+
+class TestCone(unittest.TestCase):
+    def setUp(self):
+        self.cone = Cone(Circle(3), 4)
+
+    def test_area(self):
+        self.assertEqual(round(self.cone.area(), 3), 75.398)
+
+    def test_volume(self):
+        self.assertEqual(round(self.cone.volume(), 3), 37.699)
+
+
+class TestCylinder(unittest.TestCase):
+    def setUp(self):
+        self.cylinder = Cylinder(Circle(3), 4)
+
+    def test_area(self):
+        self.assertEqual(round(self.cylinder.area(), 3), 131.947)
+
+    def test_volume(self):
+        self.assertEqual(round(self.cylinder.volume(), 3), 113.097)
+
+    def test_diagonal(self):
+        self.assertEqual(round(self.cylinder.diagonal(), 3), 7.211)
+
+
+class TestPyramid(unittest.TestCase):
+    def setUp(self):
+        self.pyramid = Pyramid(Triangle(3, 4, 5), 4)
+
+    def test_area(self):
+        self.assertEqual(int(self.pyramid.area()), 30)
+
+    def test_volume(self):
+        self.assertEqual(int(self.pyramid.volume()), 8)
+
+
+if __name__ == "__main__":
+    unittest.main()
